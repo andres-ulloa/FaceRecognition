@@ -8,7 +8,7 @@ import time
 
 import cv2
 
-from medium_facenet_tutorial.align_dlib import AlignDlib
+from pre_process import AlignDlib
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +39,7 @@ def main(input_dir, output_dir, crop_dim):
 
 
 def preprocess_image(input_path, output_path, crop_dim):
-    """
-    Detect face, align and crop :param input_path. Write output to :param output_path
-    :param input_path: Path to input image
-    :param output_path: Path to write processed image
-    :param crop_dim: dimensions to crop image to
-    """
+    
     image = _process_image(input_path, crop_dim)
     if image is not None:
         logger.debug('Writing processed file: {}'.format(output_path))
