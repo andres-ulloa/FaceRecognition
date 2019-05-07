@@ -9,49 +9,60 @@ from inception_blocks_v2 import *
 from keras import backend as K
 
 
-def compute_triplet_loss(y_true, y_pred, alpha = 0.25):
+class SiameseNetwork:
 
-    anchor, positive, negative = y_pred[0], y_pred[1], y_pred[2]
-
-    pos_dist = tf.reduce_sum(tf.square(tf.subtract(anchor,
-               positive)), axis=-1)
-    neg_dist = tf.reduce_sum(tf.square(tf.subtract(anchor, 
-               negative)), axis=-1)
-
-    basic_loss = tf.add(tf.subtract(pos_dist, neg_dist), alpha)
-    loss = tf.reduce_sum(tf.maximum(basic_loss, 0.0))
-   
-    return loss
+    def __init__(self, learning_rate, input_shape):
+        self.learning_rate = learning_rate
+        self.FRmodel = build_model()
+        self.input_shape = input_shape
 
 
-def build_model():
-    K.set_image_data_format('channels_first')
-    FRmodel = faceRecoModel(input_shape = (3, 96, 96))
-    FRmodel.compile(optimizer = 'adam', loss = triplet_loss, metrics = ['accuracy'])
-    load_weights_from_FaceNet(FRmodel)
-    return FRmodel
+    def compute_triplet_loss(self, y_true, y_pred, alpha = self.learning_rate):
 
+        anchor, positive, negative = y_pred[0], y_pred[1], y_pred[2]
 
-def generate_embeddings(FRmodel):
+        pos_dist = tf.reduce_sum(tf.square(tf.subtract(anchor,
+                positive)), axis=-1)
+        neg_dist = tf.reduce_sum(tf.square(tf.subtract(anchor, 
+                negative)), axis=-1)
+
+        basic_loss = tf.add(tf.subtract(pos_dist, neg_dist), alpha)
+        loss = tf.reduce_sum(tf.maximum(basic_loss, 0.0))
     
-    database = {}
+        return loss
 
-    for file in glob.glob("images/*"):
-    
-        identity = os.path.splitext(os.path.basename(file))[0]
-        database[identity] = img_path_to_encoding(file, FRmodel)
-    
-    return database
 
-def classify():
-    pass
+    def build_model(self):
+        K.set_image_data_format('channels_first')
+        input_shape = self.input_shape
+        FRmodel = faceRecoModel(input_shape)
+        print('\nInput shape = ', input_shape)
+        FRmodel.compile(optimizer = 'adam', loss = compute_triplet_loss, metrics = ['accuracy'])
+        print('Loading weights..\n\n')
+        load_weights_from_FaceNet(FRmodel)
+        print('Done.')  
+        return FRmodel
 
-def main():
 
-    FRmodel = build_model()
-    embeddings = generate_embeddings(FRmodel)
+    def generate_embeddings():
+
+        print('--------------------------------------------------------------------------')
+        print('----------------------GENERATING EMBEDDINGS-------------------------------')
+        print('--------------------------------------------------------------------------')
+        database = {}
+
+        for file in glob.glob("cropped_images/*"):
+        
+            identity = os.path.splitext(os.path.basename(file))[0]
+            database[identity] = img_path_to_encoding(file, self.FRmodel)
+        
+        print('\nDone.')
+        print('Saving...')
+        np.savetxt('embeddings.csv', embeddings, delimiter = ',')
 
 
 
 if __name__ == '__main__':
-    main()
+
+    facenet = SiameseNetwork(0.25, (3, 96, 96))
+    facenet.generate_embeddings()
