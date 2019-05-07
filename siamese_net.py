@@ -13,8 +13,9 @@ class SiameseNetwork:
 
     def __init__(self, learning_rate, input_shape):
         self.learning_rate = learning_rate
-        self.FRmodel = build_model()
         self.input_shape = input_shape
+        self.FRmodel = build_model()
+       
 
 
     def compute_triplet_loss(self, y_true, y_pred, alpha = self.learning_rate):
@@ -33,6 +34,17 @@ class SiameseNetwork:
 
 
     def build_model(self):
+
+        print('Model architecture: inception_V2_resnet\n')
+        print('Num inception modules = 2')
+        print('Architecure internals: \n\n')
+        print('First bock.\n')
+        print('Conv2D(64, (7, 7), strides = (2, 2), ZeroPadding2D((1, 1))(X) MaxPooling2D((3, 3), strides = 2)\n')
+        print('Second bock.\n')
+        print(' Conv2D(64, (1, 1), strides = (1, 1), BatchNormalization(axis = 1, epsilon=0.00001')
+        print(' inception_block_1a(X) , inception_block_1b(X), inception_block_1c(X), Inception 2: a/b, inception_block_2a(X), inception_block_2b(X) \n\n')
+        print('inception_block_3a(X)')
+        print('inception_block_3b(X)\n\n')
         K.set_image_data_format('channels_first')
         input_shape = self.input_shape
         FRmodel = faceRecoModel(input_shape)
@@ -41,10 +53,11 @@ class SiameseNetwork:
         print('Loading weights..\n\n')
         load_weights_from_FaceNet(FRmodel)
         print('Done.')  
+
         return FRmodel
 
 
-    def generate_embeddings():
+    def generate_embeddings(file_name):
 
         print('--------------------------------------------------------------------------')
         print('----------------------GENERATING EMBEDDINGS-------------------------------')
@@ -58,6 +71,6 @@ class SiameseNetwork:
         
         print('\nDone.')
         print('Saving...')
-        np.savetxt('embeddings.csv', embeddings, delimiter = ',')
+        np.savetxt(file_name, embeddings, delimiter = ',')
 
 
