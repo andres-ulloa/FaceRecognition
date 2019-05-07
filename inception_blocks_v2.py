@@ -13,6 +13,13 @@ import fr_utils
 from keras.layers.core import Lambda, Flatten, Dense
 
 
+""" If you're going to perform inception, you need imagination. 
+
+You need the simplest version of the idea-the one that will grow naturally in the subject's mind. Subtle art.” 
+― Christopher Nolan, Inception: The Shooting Script
+
+"""
+
 def inception_block_1a(X):
     """
     Implementation of an inception block
