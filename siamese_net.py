@@ -34,7 +34,7 @@ class SiameseNetwork:
 
 
     def build_model(self):
-
+        print('\n\n “If you re going to perform inception, you need imagination. You need the simplest version of the idea-the one that will grow naturally in the subjects mind. Subtle art.” \n\n')
         print('Model architecture: inception_V2_resnet\n')
         print('Num inception modules = 2')
         print('Architecure internals: \n\n')
