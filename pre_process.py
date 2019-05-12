@@ -16,24 +16,22 @@ align_dlib = AlignDlib(os.path.join(os.path.dirname(__file__), 'shape_predictor_
 
 
 def main(input_dir, output_dir, crop_dim):
+
     start_time = time.time()
     pool = mp.Pool(processes=mp.cpu_count())
     print('Num_parallel_cores: ', mp.cpu_count())
     print('Crop dimensions = ', crop_dim)
     print('\n........................INITIALIZING EYE/MOUTH ALIGNMENT.............................\n')
+
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-
-    for image_dir in os.listdir(input_dir):
-        image_output_dir = os.path.join(output_dir, os.path.basename(os.path.basename(image_dir)))
-        if not os.path.exists(image_output_dir):
-            os.makedirs(image_output_dir)
-
-    image_paths = glob.glob(os.path.join(input_dir, '**/*.jpg'))
+    
+    image_paths = os.listdir(input_dir)
+    
     for index, image_path in enumerate(image_paths):
-        image_output_dir = os.path.join(output_dir, os.path.basename(os.path.dirname(image_path)))
-        output_path = os.path.join(image_output_dir, os.path.basename(image_path))
-        pool.apply_async(preprocess_image, (image_path, output_path, crop_dim))
+        output_path = os.path.join(output_dir, os.path.basename(image_path))
+        input_path = 'raw_training_set/' + image_path
+        pool.apply_async(preprocess_image, (input_path, output_path, crop_dim))
 
     pool.close()
     pool.join()
@@ -43,12 +41,15 @@ def main(input_dir, output_dir, crop_dim):
 
 def preprocess_image(input_path, output_path, crop_dim):
     
+   
     image = _process_image(input_path, crop_dim)
     if image is not None:
         logger.debug('Writing processed file: {}'.format(output_path))
+        print(output_path)
         cv2.imwrite(output_path, image)
     else:
-        logger.warning("Skipping filename: {}".format(input_path))
+        print("Skipping filename: {}".format(input_path))
+
 
 
 def _process_image(filename, crop_dim):
