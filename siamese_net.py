@@ -57,20 +57,20 @@ class SiameseNetwork:
         return FRmodel
 
 
-    def generate_embeddings(file_name):
+    def generate_embeddings(input_file, output_file):
 
         print('--------------------------------------------------------------------------')
         print('----------------------GENERATING EMBEDDINGS-------------------------------')
         print('--------------------------------------------------------------------------')
         database = {}
 
-        for file in glob.glob("cropped_images/*"):
+        for file in glob.glob(input_file):
         
             identity = os.path.splitext(os.path.basename(file))[0]
             database[identity] = img_path_to_encoding(file, self.FRmodel)
         
         print('\nDone.')
         print('Saving...')
-        np.savetxt(file_name, embeddings, delimiter = ',')
+        np.savetxt(output_file, embeddings, delimiter = ',')
 
 
