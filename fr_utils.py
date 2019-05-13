@@ -36,6 +36,7 @@ def concatenate(tensors, axis=-1):
 def LRN2D(x):
     return tf.nn.lrn(x, alpha=1e-4, beta=0.75)
 
+
 def conv2d_bn(x,
               layer=None,
               cv1_out=None,
@@ -58,6 +59,7 @@ def conv2d_bn(x,
     tensor = BatchNormalization(axis=1, epsilon=0.00001, name=layer+'_bn'+'2')(tensor)
     tensor = Activation('relu')(tensor)
     return tensor
+
 
 WEIGHTS = [
   'conv1', 'bn1', 'conv2', 'bn2', 'conv3', 'bn3',
@@ -172,6 +174,7 @@ def load_weights():
 
 
 def load_dataset():
+
     train_dataset = h5py.File('datasets/train_happy.h5', "r")
     train_set_x_orig = np.array(train_dataset["train_set_x"][:]) # your train set features
     train_set_y_orig = np.array(train_dataset["train_set_y"][:]) # your train set labels
@@ -187,10 +190,13 @@ def load_dataset():
     
     return train_set_x_orig, train_set_y_orig, test_set_x_orig, test_set_y_orig, classes
 
+
 def img_to_encoding(image_path, model):
+
     img1 = cv2.imread(image_path, 1)
     img = img1[...,::-1]
-    img = np.around(np.transpose(img, (2,0,1))/255.0, decimals=12)
+    img = np.around(np.transpose(img, (2,0,1))/255.0, decimals = 12)
     x_train = np.array([img])
     embedding = model.predict_on_batch(x_train)
+
     return embedding

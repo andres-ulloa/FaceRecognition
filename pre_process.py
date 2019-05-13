@@ -18,7 +18,7 @@ align_dlib = AlignDlib(os.path.join(os.path.dirname(__file__), 'shape_predictor_
 def main(input_dir, output_dir, crop_dim):
 
     start_time = time.time()
-    pool = mp.Pool(processes=mp.cpu_count())
+    pool = mp.Pool(processes = mp.cpu_count())
     print('Num_parallel_cores: ', mp.cpu_count())
     print('Crop dimensions = ', crop_dim)
     print('\n........................INITIALIZING EYE/MOUTH ALIGNMENT.............................\n')
@@ -67,6 +67,7 @@ def _process_image(filename, crop_dim):
 
 
 def _buffer_image(filename):
+
     logger.debug('Reading image: {}'.format(filename))
     image = cv2.imread(filename, )
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -74,6 +75,7 @@ def _buffer_image(filename):
 
 
 def _align_image(image, crop_dim):
+
     bb = align_dlib.getLargestFaceBoundingBox(image)
     aligned = align_dlib.align(crop_dim, image, bb, landmarkIndices=AlignDlib.INNER_EYES_AND_BOTTOM_LIP)
     if aligned is not None:
@@ -82,6 +84,7 @@ def _align_image(image, crop_dim):
 
 
 if __name__ == '__main__':
+
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser(add_help=True)
     parser.add_argument('--input-dir', type=str, action='store', default='data', dest='input_dir')
