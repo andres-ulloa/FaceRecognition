@@ -232,8 +232,6 @@ def faceRecoModel(input_shape):
         
     # Define the input as a tensor with shape input_shape
     X_input = Input(input_shape)
-    print('IP = ' , X_input)
-    
     # Zero-Padding
     X = ZeroPadding2D((3, 3))(X_input)
     

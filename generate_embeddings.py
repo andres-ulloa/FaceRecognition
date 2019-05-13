@@ -42,8 +42,9 @@ def generate_embeddings(input_dir, FRmodel):
             name = get_name(identity)
             path = input_dir + '/' + path
 
-            print(identity)
+            print(identity) 
             embedding = FRmodel.generate_embedding(path)[0]
+            print(embedding.shape)
             embeddings.append(embedding)
 
             classes.append(name)
