@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 label_position = 28 * 28
 
-num_epochs = 3000
+num_epochs = 5000
 hidden_layer_size = 20
 learning_rate = 0.0005
 
@@ -19,6 +19,7 @@ def find_highest_scoring_class(vector):
     best_score_index = 0
 
     for i in range(0, len(vector)):
+
         if vector[i] == target:
             best_score_index = i
             break
@@ -32,15 +33,16 @@ def map_ones_to_integer(binary_vector):
             return i 
 
 
-def classify(dataset, true_labels ,model):
+def classify(dataset, true_labels ,model, identities):
 
     examples_counter = 0
     predictions = model.classify(dataset)
     results = []
+
     for num_example in range(0 , len(predictions)):
 
         highest_scoring_class = find_highest_scoring_class(predictions[num_example])
-        label = (num_example, highest_scoring_class, map_ones_to_integer(true_labels[num_example]))
+        label = (num_example, highest_scoring_class, map_ones_to_integer(true_labels[num_example]), identities[num_example])
         results.append(label)
 
     return results
@@ -120,23 +122,6 @@ def train(neural_net, dataset, num_epochs):
     print('\nDone.')
 
 
-def split_labels(dataset):
-    
-    labels = []
-    new_dataset = []
-
-    for i in range(0, len( dataset)):
-        feature_vector = dataset[i]
-        label = feature_vector[len(dataset[i]) - 1]
-        feature_vector = np.delete(feature_vector, len(dataset[i]) - 1)
-        vectorized_label = np.zeros(10)
-        vectorized_label[int(label)] = 1
-        labels.append(vectorized_label)
-        new_dataset.append(feature_vector)
-    
-    return np.asarray(labels), np.asarray(new_dataset)
-
-
 def ensemble_model_from_file():
 
     input_layer_size = 28 * 28 #there are going to be as much input neurons as there are pixels in each image
@@ -150,6 +135,7 @@ def ensemble_model_from_file():
     global learning_rate 
     neural_net = ANN(input_layer_size, num_classes, num_hidden_layers, hidden_layer_size, learning_rate, num_layers, [], []) 
     neural_net.load_weights_from_memory()
+
     print('Current model architecture: \n')
     print('Epochs = ', num_epochs)
     print('Alpha_rate = ', neural_net.learning_rate)
@@ -157,8 +143,8 @@ def ensemble_model_from_file():
     print('Input layer size = ', neural_net.input_layer_size)
     print('Hidden layer size = ', neural_net.hidden_layer_size)
     print('Output layer size = ', neural_net.output_layer_size)
-    return neural_net
 
+    return neural_net
 
 
 def demo():
@@ -169,14 +155,31 @@ def demo():
     dataset = np.genfromtxt('mnist.txt')
     neural_net = ensemble_model_from_file()
     input('\nPress enter to continue...\n')
-    train_test, test_set = trim_dataset(dataset, 900, 100)    
-    labels_test, dataset_test = split_labels(test_set)
+
+    emebeddings, identities, names = load_dataset('embeddings.csv','identities.txt','classes.txt')
+    
+    identities.pop()
+    names.pop()
+
+    labels = []
+
+    for name in names: 
+        labels.append(map_name_to_class(name))
+
+    training_set_size = 100
+    test_set_size = 20
+
+    training_set, test_set = trim_dataset(emebeddings, training_set_size, test_set_size)
+    training_labels, test_labels = trim_dataset(labels, training_set_size, test_set_size)
+    identities_training, identities_test = trim_dataset(identities, training_set_size, test_set_size)
+
     print('\nRunning retrieved model on Test set... \n')
-    predictions = classify(dataset_test, labels_test, neural_net)
+    predictions = classify(test_set, test_labels, neural_net, identities_training)
     print(predictions)
-    results = compute_confution_matrix(predictions, 10)
+    results = compute_confution_matrix(predictions, 11)
     print('\nRESULTS = \n')
     for i in range(0, len(results)): print('Class ', i, '\n', results[i], '\n')
+    
 
 
 def plot_error_registry(error_registry):
@@ -204,42 +207,40 @@ def load_dataset(data_path, identities_path, labels_path):
 def map_name_to_class(name):
     
     if 'Aaron_Eckhart' == name:
-        return 0
+        return np.array([1,0,0,0,0,0,0,0,0,0,0])
 
     elif 'Al_Pacino' == name:
-        return 1
+        return np.array([0,1,0,0,0,0,0,0,0,0,0])
 
     elif 'Adrien_Brody' == name:
-        return 2
+        return np.array([0,0,1,0,0,0,0,0,0,0,0])
 
     elif 'Leonardo_DiCaprio' == name:
-        return 3
+        return np.array([0,0,0,1,0,0,0,0,0,0,0])
 
     elif 'Brad_Pitt' == name:
-        return 4
+        return np.array([0,0,0,0,1,0,0,0,0,0,0])
 
     elif 'Angelina_Jolie' == name:
-        return 5
+        return np.array([0,0,0,0,0,1,0,0,0,0,0])
 
     elif 'Matthew_Perry' == name:
-        return 6
+        return np.array([0,0,0,0,0,0,1,0,0,0,0])
 
     elif 'Harrison_Ford' == name:
-        return 7
+        return np.array([0,0,0,0,0,0,0,1,0,0,0])
     
     elif 'Vin_Diesel' == name:
-        return 8
+        return  np.array([0,0,0,0,0,0,0,0,1,0,0])
 
     elif 'Adam_Sandler' == name:
-        return 9
-
+        return np.array([0,0,0,0,0,0,0,0,0,1,0])
 
 
 def train_model():
 
     emebeddings, identities, names = load_dataset('embeddings.csv','identities.txt','classes.txt')
     
-    print(emebeddings.shape)
     identities.pop()
     names.pop()
 
@@ -248,32 +249,44 @@ def train_model():
     for name in names: 
         labels.append(map_name_to_class(name))
 
-    print(labels)
-    print(identities)   
-    """
+    training_set_size = 100
+    test_set_size = 20
+    
+    training_set, test_set = trim_dataset(emebeddings, training_set_size, test_set_size)
+    training_labels, test_labels = trim_dataset(labels, training_set_size, test_set_size)
+    identities_training, identities_test = trim_dataset(identities, training_set_size, test_set_size)
+
     input_layer_size = 128
-    num_classes = 10
+    num_classes = 11
     num_hidden_layers = 1
+
     global hidden_layer_size  #not considering bias units so a + 1 size in each layer should always be taken into consideration
     global num_epochs
-    training_set_size = 900
-    test_set_size = 100
+  
     num_layers = num_hidden_layers + 1
     global learning_rate
-    labels, dataset = split_labels(dataset)
-    neural_net = ANN(input_layer_size, num_classes, num_hidden_layers, hidden_layer_size, learning_rate, num_layers, dataset, labels) 
-    train(neural_net, dataset, num_epochs)
+
+    neural_net = classification_layer(input_layer_size, num_classes, num_hidden_layers, hidden_layer_size, learning_rate, num_layers, training_set, training_labels) 
+    train(neural_net, training_set, num_epochs)
     neural_net.save_weights()
+    print('Final error = ', neural_net.error_registry[len(neural_net.error_registry) - 1])
     plot_error_registry(neural_net.error_registry)
+
+    results = classify(training_set, training_labels, neural_net, identities_training)
+    
+    print(results)
+    """confution_matrix = compute_confution_matrix(results, 11)
+    print('\nRESULTS = \n')
+    for i in range(0, len(results)): print('Class ', i, '\n', results[i], '\n')
     """
 
 
 if __name__ == '__main__':
-    """
+    
     u_input = input('Train a new architecture?(Y/N)\n')
     if u_input.lower() == 'y':
         train_model()
     else:
         demo()
-    """
-    train_model()
+    
+ 

@@ -14,8 +14,8 @@ class classification_layer:
     
     def __init__(self, input_layer_size, output_layer_size, num_hidden_layers, hidden_layer_size, learning_rate, num_layers, input_, labels):
         
-        self.labels = labels
-        self.input = input_ 
+        self.labels = np.vstack(labels)
+        self.input = np.vstack(input_) 
         self.input_layer_size = input_layer_size
         self.output_layer_size = output_layer_size
         self.num_hidden_layers = num_hidden_layers             
@@ -32,13 +32,12 @@ class classification_layer:
         self.bias_unit = 1
 
 
-
     def load_weights_from_memory(self):
        print('\nRetrieving weights from: params_layer_1_csv, params_layer_2.csv, bias_unit.csv')
        print('...')
        print('...\n')
-       self.weights_layer_1 =  np.loadtxt('params_layer_1.csv' , delimiter = ',')
-       self.weights_layer_2 =  np.loadtxt('params_layer_2.csv' , delimiter = ',')
+       self.weights_layer_1 =  np.loadtxt('fcl_weights_1.csv' , delimiter = ',')
+       self.weights_layer_2 =  np.loadtxt('fcl_weights_2.csv' , delimiter = ',')
        self.bias_unit =  np.loadtxt('bias_unit.csv' , delimiter = ',')
        print(self.weights_layer_1.shape)
        print(self.weights_layer_2.shape)
@@ -58,7 +57,6 @@ class classification_layer:
 
     def classify(self, dataset):
         self.input = dataset
-        #we get rid of the label at the end of the vector
         self.run_shallow_activation_pass()
         return self.output
 
