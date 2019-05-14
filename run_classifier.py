@@ -10,6 +10,21 @@ num_epochs = 5000
 hidden_layer_size = 20
 learning_rate = 0.0005
 
+class class_performance:
+
+    def __init__(self, F, P, PDR, NDR):
+        self.F = F
+        self.precision = P
+        self.positive_detection_rate = PDR
+        self.negative_detection_rate = NDR
+
+    def print_roc(self):
+        print('PRINTING ROC METRICS: ')
+        print('F = ', self.F)
+        print('P = ', self.precision)
+        print('PDR = ', self.positive_detection_rate)
+        print('NDR = ', self.negative_detection_rate)
+
 
 def find_highest_scoring_class(vector):
 
@@ -66,6 +81,7 @@ def trim_dataset(dataset, train_set_size, test_set_size):
 def compute_confution_matrix(labels, num_classes):
     
     confution_matrix_list = list()
+    roc_metrics = list()
 
     for class_index  in range(0 , num_classes):
 
@@ -73,7 +89,9 @@ def compute_confution_matrix(labels, num_classes):
         true_negatives = 0
         false_positives = 0
         false_negatives = 0
-            
+        
+        PDR = NDR = P = F = 0 
+
         for label in labels:
 
             assigned_label = label[1]
@@ -90,9 +108,23 @@ def compute_confution_matrix(labels, num_classes):
                 
             elif assigned_label != true_label and assigned_label == class_index:
                 false_positives += 1
-            
+        
+        if true_positives + false_negatives != 0:
+
+            PDR = true_positives / (true_positives + false_negatives)
+
+        if false_negatives + false_positives != 0:
+
+            NDR = true_negatives/ (true_negatives + false_positives)
+        if true_positives + false_positives != 0:
+
+            P = true_positives/(true_positives + false_positives)
+        if PDR + P != 0:
+            F = ( 2 * PDR * P)/ (PDR + P)
+        
         confution_matrix = np.array([[true_positives, false_positives],[false_negatives, true_negatives]])
         confution_matrix_list.append(confution_matrix)
+
 
     return confution_matrix_list
 
@@ -133,7 +165,7 @@ def ensemble_model_from_file():
     test_set_size = 100
     num_layers = num_hidden_layers + 1
     global learning_rate 
-    neural_net = ANN(input_layer_size, num_classes, num_hidden_layers, hidden_layer_size, learning_rate, num_layers, [], []) 
+    neural_net = classification_layer(input_layer_size, num_classes, num_hidden_layers, hidden_layer_size, learning_rate, num_layers, [0], [0]) 
     neural_net.load_weights_from_memory()
 
     print('Current model architecture: \n')
@@ -152,7 +184,6 @@ def demo():
     print('------------------------------------------------------------------------------------------------------')
     print('------------------------------------------RUNNING DEMO--------------------------------------------------')
     print('----------------------------------------------------------------------------------------------------\n\n')
-    dataset = np.genfromtxt('mnist.txt')
     neural_net = ensemble_model_from_file()
     input('\nPress enter to continue...\n')
 
@@ -174,7 +205,7 @@ def demo():
     identities_training, identities_test = trim_dataset(identities, training_set_size, test_set_size)
 
     print('\nRunning retrieved model on Test set... \n')
-    predictions = classify(test_set, test_labels, neural_net, identities_training)
+    predictions = classify(test_set, test_labels, neural_net, identities_test)
     print(predictions)
     results = compute_confution_matrix(predictions, 11)
     print('\nRESULTS = \n')
@@ -275,10 +306,10 @@ def train_model():
     results = classify(training_set, training_labels, neural_net, identities_training)
     
     print(results)
-    """confution_matrix = compute_confution_matrix(results, 11)
+    confution_matrix = compute_confution_matrix(results, 11)
     print('\nRESULTS = \n')
     for i in range(0, len(results)): print('Class ', i, '\n', results[i], '\n')
-    """
+    
 
 
 if __name__ == '__main__':

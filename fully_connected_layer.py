@@ -49,8 +49,8 @@ class classification_layer:
         print('\nSaving model parameters...')
         bias_unit = list()
         bias_unit.append(self.bias_unit)
-        np.savetxt('params_layer_1.csv', self.weights_layer_1, delimiter = ',')
-        np.savetxt('params_layer_2.csv', self.weights_layer_2, delimiter = ',')
+        np.savetxt('fcl_weights_1.csv', self.weights_layer_1, delimiter = ',')
+        np.savetxt('fcl_weights_2.csv', self.weights_layer_2, delimiter = ',')
         np.savetxt('bias_unit.csv', bias_unit, delimiter = ',')
         print('\nDone.')
 
