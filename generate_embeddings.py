@@ -65,9 +65,9 @@ def save_to_file(list, path):
 if __name__ == '__main__':
 
     facenet = SiameseNetwork(0.25, input_shape = (3, 96, 96))
-    embeddings, identities, classes = generate_embeddings('pre_processed_training_set/', facenet)
+    embeddings, identities, classes = generate_embeddings('pre_processed_test_set/', facenet)
     print('\nSaving...')
-    np.savetxt('embeddings.csv', embeddings, delimiter = ',')
-    save_to_file(identities, 'identities.txt')
-    save_to_file(classes, 'classes.txt')
+    np.savetxt('test_embeddings.csv', embeddings, delimiter = ',')
+    save_to_file(identities, 'test_identities.txt')
+    save_to_file(classes, 'test_classes.txt')
     print('\nDone.')
