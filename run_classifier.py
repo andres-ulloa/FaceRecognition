@@ -4,10 +4,10 @@ import pandas as pd
 from fully_connected_layer import classification_layer
 import matplotlib.pyplot as plt 
 
-
 label_position = 28 * 28
-num_epochs = 5000
-hidden_layer_size = 25
+
+num_epochs = 3000
+hidden_layer_size = 20
 learning_rate = 0.0005
 
 
@@ -184,9 +184,73 @@ def plot_error_registry(error_registry):
     plt.show()
 
 
-def train_model():
+def load_dataset(data_path, identities_path, labels_path):
     
-    dataset = np.genfromtxt('mnist.txt')
+    emebeddings = identities = labels = None
+    
+    emebeddings = np.loadtxt(data_path, delimiter = ',')
+    
+    identities_file = open(identities_path, "r")
+    identities = identities_file.read().split('\n')
+    identities_file.close()
+
+    labels_file = open(labels_path, "r")
+    labels = labels_file.read().split('\n')
+    labels_file.close()
+
+    return emebeddings, identities, labels
+
+
+def map_name_to_class(name):
+    
+    if 'Aaron_Eckhart' == name:
+        return 0
+
+    elif 'Al_Pacino' == name:
+        return 1
+
+    elif 'Adrien_Brody' == name:
+        return 2
+
+    elif 'Leonardo_DiCaprio' == name:
+        return 3
+
+    elif 'Brad_Pitt' == name:
+        return 4
+
+    elif 'Angelina_Jolie' == name:
+        return 5
+
+    elif 'Matthew_Perry' == name:
+        return 6
+
+    elif 'Harrison_Ford' == name:
+        return 7
+    
+    elif 'Vin_Diesel' == name:
+        return 8
+
+    elif 'Adam_Sandler' == name:
+        return 9
+
+
+
+def train_model():
+
+    emebeddings, identities, names = load_dataset('embeddings.csv','identities.txt','classes.txt')
+    
+    print(emebeddings.shape)
+    identities.pop()
+    names.pop()
+
+    labels = []
+
+    for name in names: 
+        labels.append(map_name_to_class(name))
+
+    print(labels)
+    print(identities)   
+    """
     input_layer_size = 128
     num_classes = 10
     num_hidden_layers = 1
@@ -201,11 +265,15 @@ def train_model():
     train(neural_net, dataset, num_epochs)
     neural_net.save_weights()
     plot_error_registry(neural_net.error_registry)
+    """
 
 
 if __name__ == '__main__':
+    """
     u_input = input('Train a new architecture?(Y/N)\n')
     if u_input.lower() == 'y':
         train_model()
     else:
         demo()
+    """
+    train_model()
